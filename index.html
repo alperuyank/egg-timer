@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egg Timer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 50px;
+            background: linear-gradient(to right, #ffcc33, #ff9966);
+            color: #fff;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: #333;
+        }
+        .timer {
+            font-size: 2.5em;
+            margin: 20px;
+            color: #ff5722;
+            font-weight: bold;
+        }
+        button {
+            font-size: 1.2em;
+            margin: 5px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .start { background-color: #ffcc33; color: #333; }
+        .pause { background-color: #ff9966; color: #fff; }
+        .reset { background-color: #ff5722; color: #fff; }
+        .preset {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .preset button {
+            width: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            font-size: 1.1em;
+            background-color: #ffa726;
+            color: white;
+            font-weight: bold;
+        }
+        .preset img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .clock {
+            width: 150px;
+            height: 150px;
+        }
+        .hand {
+            stroke: #ff5722;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transform-origin: 50% 50%;
+            transition: transform 0.2s ease-in-out;
+        }
+        @media (max-width: 480px) {
+            .container { width: 90%; }
+            .preset button { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Egg Timer</h1>
+        <div class="clock-container">
+            <svg class="clock" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" stroke="#ff5722" stroke-width="4" fill="white"/>
+                <line id="hand" x1="50" y1="50" x2="50" y2="20" class="hand"/>
+            </svg>
+            <div class="timer" id="display">00:00</div>
+        </div>
+        <button class="start" onclick="startTimer()">Start</button>
+        <button class="pause" onclick="pauseTimer()">Pause</button>
+        <button class="reset" onclick="resetTimer()">Reset</button>
+        <h2>Preset Times</h2>
+        <div class="preset">
+            <button onclick="setPreset(4, 30)">
+                <img src="images/kayisi.png" alt="Soft-Boiled"> 4:30 - Soft-Boiled
+            </button>
+            <button onclick="setPreset(6, 30)">
+                <img src="images/orta.png" alt="Medium-Boiled"> 6:30 - Medium-Boiled
+            </button>
+            <button onclick="setPreset(8, 30)">
+                <img src="images/tam.png" alt="Hard-Boiled"> 8:30 - Hard-Boiled
+            </button>
+            <button onclick="setPreset(10, 0)">
+                <img src="images/tam-kati.png" alt="Very Hard-Boiled"> 10:00 - Very Hard-Boiled
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        let timer;
+        let remainingTime = 0;
+        let isRunning = false;
+        let audio = new Audio('/sounds/default.mp3');
+
+        function startTimer() {
+            if (isRunning) return;
+            if (remainingTime <= 0) return;
+            isRunning = true;
+            updateDisplay();
+            timer = setInterval(() => {
+                if (remainingTime > 0) {
+                    remainingTime--;
+                    updateDisplay();
+                    updateClock();
+                } else {
+                    clearInterval(timer);
+                    audio.play();
+                    alert("Time's up!");
+                    isRunning = false;
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timer);
+            isRunning = false;
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            remainingTime = 0;
+            updateDisplay();
+            updateClock();
+        }
+
+        function setPreset(minutes, seconds) {
+            remainingTime = minutes * 60 + seconds;
+            updateDisplay();
+            updateClock();
+        }
+
+        function updateDisplay() {
+            let minutes = Math.floor(remainingTime / 60);
+            let seconds = remainingTime % 60;
+            document.getElementById("display").textContent = 
+                (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+        }
+
+        function updateClock() {
+            let angle = (remainingTime / 600) * 360;
+            document.getElementById("hand").style.transform = `rotate(${angle}deg)`;
+        }
+    </script>
+</body>
+</html>
